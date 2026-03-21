@@ -42,7 +42,7 @@ Features
     
 *   **Blogs** – Insights of the famous blogs of our club
     
-*   **Responsive Design** – Works across devices
+
     
 
 Note
