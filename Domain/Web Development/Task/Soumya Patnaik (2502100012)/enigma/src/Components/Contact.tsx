@@ -1,26 +1,14 @@
 
 import { Send, Github, Twitter, Linkedin, Mail } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export default function Contact() {
 
-    const [typed, setTyped] = useState("");
+
     const fullText = "contact";
 
 
-    useEffect(() => {
-        let i = 0;
-        setTyped("");
-        const interval = setInterval(() => {
-            if (i < fullText.length) {
-                setTyped(fullText.slice(0, i + 1));
-                i++;
-            } else {
-                clearInterval(interval);
-            }
-        }, 120);
-        return () => clearInterval(interval);
-    }, []);
+    
 
     const [formData, setFormData] = useState({
         name: '',
@@ -37,10 +25,9 @@ export default function Contact() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // Here you would typically send the data to your backend / Formspree / etc.
+      
         console.log('Form submitted:', formData);
-        // Reset form after submission (optional)
-        // setFormData({ name: '', email: '', message: '' });
+       
     };
 
     return (
@@ -49,7 +36,7 @@ export default function Contact() {
 
                 <div className="text-center mb-10">
 
-                    <code className="comment-badge mb-10    ">//{fullText}</code>
+                    <code className="comment-badge mb-10    ">{fullText}</code>
 
 
                     <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
@@ -61,7 +48,6 @@ export default function Contact() {
                     </p>
                 </div>
 
-                {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
                         <input
