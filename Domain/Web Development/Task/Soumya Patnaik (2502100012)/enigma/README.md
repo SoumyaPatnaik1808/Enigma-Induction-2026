@@ -42,7 +42,8 @@ Features
     
 *   **Blogs** – Insights of the famous blogs of our club
     
-
+##Deployed link : 
+https://enigma-three-inky.vercel.app/ 
     
 
 Note
