@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, StyleSheet, ScrollView,
-  TouchableOpacity, KeyboardAvoidingView, Platform, Alert
+  TouchableOpacity, KeyboardAvoidingView, Platform,
+  Alert, Image
 } from 'react-native';
 import { Audio } from 'expo-av';
+import * as ImagePicker from 'expo-image-picker';
 import { getNotes, saveNotes } from '../storage/noteStorage';
 import { colors } from '../theme/colors';
 
@@ -15,13 +17,12 @@ export default function NoteEditorScreen({ route, navigation }) {
   const [content, setContent] = useState(existing?.content || '');
   const [checklist, setChecklist] = useState(existing?.checklist || []);
   const [newTask, setNewTask] = useState('');
-
-  // Voice recording states
   const [recording, setRecording] = useState(null);
   const [voiceUri, setVoiceUri] = useState(existing?.voiceUri || null);
   const [sound, setSound] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [images, setImages] = useState(existing?.images || []);
 
   useEffect(() => {
     navigation.setOptions({
@@ -31,9 +32,8 @@ export default function NoteEditorScreen({ route, navigation }) {
         </TouchableOpacity>
       ),
     });
-  }, [title, content, checklist, voiceUri]);
+  }, [title, content, checklist, voiceUri, images]);
 
-  // Cleanup sound on unmount
   useEffect(() => {
     return sound ? () => { sound.unloadAsync(); } : undefined;
   }, [sound]);
@@ -99,6 +99,37 @@ export default function NoteEditorScreen({ route, navigation }) {
     ]);
   };
 
+  // Image picker function
+  const pickImage = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Please allow gallery access!');
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 0.7,
+      });
+      if (!result.canceled) {
+        setImages([...images, result.assets[0].uri]);
+      }
+    } catch (err) {
+      Alert.alert('Error', 'Could not pick image!');
+    }
+  };
+
+  const deleteImage = (index) => {
+    Alert.alert('Delete Image', 'Are you sure?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete', style: 'destructive',
+        onPress: () => setImages(images.filter((_, i) => i !== index))
+      }
+    ]);
+  };
+
   const saveNote = async () => {
     if (!title.trim() && !content.trim() && checklist.length === 0) {
       Alert.alert('Empty Note', 'Please add some content before saving.');
@@ -109,14 +140,14 @@ export default function NoteEditorScreen({ route, navigation }) {
     if (existing) {
       const updated = notes.map(n =>
         n.id === existing.id
-          ? { ...n, title, content, checklist, voiceUri, updatedAt: now }
+          ? { ...n, title, content, checklist, voiceUri, images, updatedAt: now }
           : n
       );
       await saveNotes(updated);
     } else {
       const newNote = {
         id: uuidv4(), title, content, checklist,
-        voiceUri, images: [],
+        voiceUri, images,
         createdAt: now, updatedAt: now,
       };
       await saveNotes([newNote, ...notes]);
@@ -215,6 +246,23 @@ export default function NoteEditorScreen({ route, navigation }) {
           )}
         </View>
 
+        {/* Image Section */}
+        <Text style={styles.sectionLabel}>🖼️ Images</Text>
+        <TouchableOpacity style={styles.addImageBtn} onPress={pickImage}>
+          <Text style={styles.addImageText}>+ Add Image from Gallery</Text>
+        </TouchableOpacity>
+        {images.map((uri, index) => (
+          <View key={index} style={styles.imageContainer}>
+            <Image source={{ uri }} style={styles.image} />
+            <TouchableOpacity
+              style={styles.deleteImageBtn}
+              onPress={() => deleteImage(index)}
+            >
+              <Text style={styles.deleteImageText}>✕</Text>
+            </TouchableOpacity>
+          </View>
+        ))}
+
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -264,4 +312,17 @@ const styles = StyleSheet.create({
     flex: 1, backgroundColor: '#FFCDD2',
     borderRadius: 12, padding: 14, alignItems: 'center',
   },
+  addImageBtn: {
+    borderWidth: 2, borderColor: colors.border, borderStyle: 'dashed',
+    borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 8,
+  },
+  addImageText: { color: colors.subtext, fontSize: 14, fontWeight: '600' },
+  imageContainer: { marginTop: 12, position: 'relative' },
+  image: { width: '100%', height: 200, borderRadius: 12 },
+  deleteImageBtn: {
+    position: 'absolute', top: 8, right: 8,
+    backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: 20,
+    width: 28, height: 28, justifyContent: 'center', alignItems: 'center',
+  },
+  deleteImageText: { color: '#fff', fontSize: 12, fontWeight: '700' },
 });
