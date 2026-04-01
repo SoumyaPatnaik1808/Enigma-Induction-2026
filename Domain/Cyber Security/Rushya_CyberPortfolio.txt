@@ -1,0 +1,11 @@
+Phase 1 completion: successfully installed and updated kali linux on virtual box
+
+Tool Installation: Used the command "sudo apt install gobuster" to install Gobuster
+
+Tool Usage: Used gobuster dir -u http://scanme.nmap.org/ -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt to perform a dirbusting attack 
+Output:
+index                (Status: 200) [Size: 6974]
+/images               (Status: 301) [Size: 318]
+/shared               (Status: 301) [Size: 318]
+
+Conclusion: Successfully installed Kali Linux and performed a dirbusting attack
