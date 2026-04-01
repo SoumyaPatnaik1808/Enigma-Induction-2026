@@ -5,12 +5,12 @@ const app=express()
 app.use(express.static('./public'))
 
 
-// app.get('/',(req,res)=>{
-//     res.sendFile(path.resolve(__dirname,'./index.html'))
-// })
+app.get('/',(req,res)=>{
+    res.sendFile(path.resolve(__dirname,'./public/index.html'))
+})
 
 app.use((req,res)=>{
-    res.status(404).send('<h1>Resourse not found</h1>')
+    res.status(404).send('<h1>Resource not found</h1>')
 })
 
 app.listen(5000,()=>{
